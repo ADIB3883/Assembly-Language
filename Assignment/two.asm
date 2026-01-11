@@ -1,0 +1,145 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+    INPUT db "Enter n: $"
+    ROW DB 0
+    COL DB 0
+    FP DB 0
+    LP DB 0
+    
+.CODE 
+MAIN PROC
+    MOV AX,@DATA
+    MOV DS,AX
+    ;INPUT MSSG
+    LEA DX,INPUT
+    MOV AH,9
+    INT 21H
+    ;INPUT N
+    MOV AH,1
+    INT 21H
+    MOV BL,AL
+    SUB BL,'0'
+    ;NL+CR
+    MOV DL,0AH
+    MOV AH,2
+    INT 21H
+    MOV DL,0DH
+    MOV AH,2
+    INT 21H
+    
+    ;SETTING ROW,COL,FIRST POINTER,LAST POINTER
+    MOV ROW,BL
+    SHL BL,1
+    DEC BL
+    MOV COL,BL
+    MOV LP, BL
+    MOV BL,1
+    MOV FP,BL   
+    
+    ;TOP HALF OF BOWTIE
+    MOV CL,1
+    
+OUTER:
+    ;COL NUMBER
+    MOV CH,1
+  INNER:
+    ;HASH FOUND
+    CMP CH,FP
+    JLE HASH
+    CMP CH,LP
+    JGE HASH
+    ;SPACE PRINTING
+    MOV DX,020H
+    MOV AH,2
+    INT 21H
+    JMP ENDING
+    ;HASH PRINTING
+    HASH:
+    MOV DX,023H
+    MOV AH,2
+    INT 21H
+    ;DECIDER FOR ROW CHANGING
+    ENDING:
+    INC CH
+    CMP CH,COL
+    JG INNER_END
+    JMP INNER
+    INNER_END:
+    INC FP
+    DEC LP
+            
+    ;NL+CR        
+    MOV DL,0AH
+    MOV AH,2
+    INT 21H
+    MOV DL,0DH
+    MOV AH,2
+    INT 21H 
+    ;ROW ITERATION 
+    INC CL
+    CMP CL,ROW
+    JG OUTER_END
+    JMP  OUTER
+    OUTER_END: 
+    
+    ;BOTTOM HALF OF BOWTIE
+    ;ROW,COL,FIRST,LAST POINTER SETTING
+    MOV BL,COL
+    INC BL
+    SHR BL,1
+    MOV FP,BL
+    MOV LP,BL
+    DEC FP
+    INC LP
+    ;ROW
+    MOV CL,ROW
+    DEC CL
+OUTT:
+    ;COL
+    MOV CH,1
+   INN:
+    CMP CH,FP
+    JLE HASHH
+    CMP CH,LP
+    JGE HASHH
+    
+    MOV DX,020H
+    MOV AH,2
+    INT 21H
+    JMP ENDINGG
+    
+    HASHH:     
+    MOV DX,023H
+    MOV AH,2
+    INT 21H
+    
+    ENDINGG:
+    INC CH
+    CMP CH,COL
+    JG INN_END
+    JMP INN
+    
+    INN_END:
+    DEC FP
+    INC LP
+    
+    ;NL+CR
+    MOV DL,0AH
+    MOV AH,2
+    INT 21H
+    MOV DL,0DH
+    MOV AH,2
+    INT 21H
+    
+    DEC CL
+    CMP CL,0
+    JE OUTT_END
+    JMP OUTT
+    OUTT_END:
+    
+    MOV AH,4CH
+    INT 21H
+    
+ MAIN ENDP
+ END MAIN
